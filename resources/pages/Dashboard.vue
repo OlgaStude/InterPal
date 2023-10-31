@@ -32,7 +32,7 @@
             </button>
         </div>
         <div class="posts">
-            <div v-for="index in posts.length" :key="post">
+            <div v-for="index in posts.length" :key="index">
             <div class="post" v-if="!filter_is_on || filter_lang == posts[index-1].lang">
                 <div class="post_body">
                     <a :href="$router.resolve({name: 'UserPage', params: { id: posts[index-1].user_id }}).href"><img :src="'/storage/profile_pics/' + posts[index-1].pfp" alt=""></a>
@@ -275,7 +275,7 @@
                 errors: {
                     text: null,
                     lang: null,
-                    comment_txt: null
+                    comment_txt: []
                 },
             }
         }, created(){
@@ -300,20 +300,35 @@
                 if (e.target.value == 'no_filter') {
                     this.filter_lang = null;
                     this.filter_is_on = false;
+                    this.posts = '';
+                    this.$axios.get('http://127.0.0.1:8000/api/posts/').then(response => {
+                        this.posts = response.data.data;
+                    })
                 } else {
                     this.filter_lang = e.target.value;
                     this.filter_is_on = true;
-                    
+                    this.posts = '';
+
+                    this.$axios.get('http://127.0.0.1:8000/api/posts/').then(response => {
+                        this.posts = response.data.data;
+                    })
                 }
             },
-            onChangeLanginform(e){
-                this.form_lang = e.target.value;
+            onChangeLanginform(e) {
+
+                console.log(e.target.value)
+                if (e.target.value != 'Выберите язык') {
+                    this.form_lang = e.target.value;
+                } else {
+                    this.form_lang = null
+                }
             },
             create_post(e){
                 e.preventDefault();
                 this.errors = {
                     text: null,
-                    lang: null
+                    lang: null,
+                    comment_txt: []
                 }
                 this.$axios.post('http://127.0.0.1:8000/api/makepost', {
                     lang: this.form_lang,
@@ -326,7 +341,7 @@
                         this.posts = response.data.data;
                     })
                 }).catch(err => {
-                        console.log(err.response.data)
+                        console.log(err.response.data.errors)
                     if (err.response.data.errors.text) {
                         this.errors.text = err.response.data.errors.text[0];
                     }
@@ -337,6 +352,7 @@
             },
             create_comment(post_id, index) {
                 this.errors.comment_txt = [];
+                console.log(this.$refs['comment_text']);
                 this.$axios.post('http://127.0.0.1:8000/api/makecomment',
                     {
                         post_id: post_id,

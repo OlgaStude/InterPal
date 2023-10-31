@@ -20,41 +20,6 @@
         </div>
     
     <div class="container_user">
-        <!-- <form action="" v-if="form_is_on">
-            <select @change="onChangeLang" name="" id="" >
-                <option>Выберите язык</option>
-                <option :value="user.lang_s">{{ user.lang_s }}</option>
-                <option :value="user.lang_t">{{ user.lang_t }}</option>
-            </select>
-            <strong>{{ errors.lang }}</strong>
-            <textarea name="text" id="text" v-model="form_text" cols="30" rows="10"></textarea>
-            <strong>{{ errors.text }}</strong>
-            <button type="submit" @click="create_post">
-                Создать пост
-            </button>
-            <button @click="close_form">
-                отмена
-            </button>
-        </form>
-        <p>Это страница: {{ user.name }} {{ user.surname }}
-        {{ user.name }} изучает {{ user.lang_s }}
-        и может помочь вам с {{ user.lang_t }}</p>
-        <button v-if="user.id != user_id">
-            Начать переписку
-        </button>
-        <button v-if="user.id == user_id" @click="open_form">
-            Создать пост
-        </button>
-        <div id="posts">
-            <div class="" v-for="post in posts" :key="post">
-                <div v-if="!filter_is_on || filter_lang == post.lang" class="wrapper">
-                    <p>{{ post.text }}</p>
-                    <a :href="$router.resolve({name: 'UserPage', params: { id: post.users_id }}).href"><p><a href=""></a>{{ post.name }} {{ post.surname }}</p></a>
-
-                </div>
-                
-            </div>
-        </div> -->
         
         <div class="user_info_container">
             
@@ -357,13 +322,18 @@
                 this.form_is_on = false
             },
             onChangeLang(e){
-                this.form_lang = e.target.value;
+                if (e.target.value != 'Выберите язык') {
+                    this.form_lang = e.target.value;
+                } else {
+                    this.form_lang = null
+                }
             },
             create_post(e){
                 e.preventDefault();
                 this.errors = {
                     text: null,
-                    lang: null
+                    lang: null,
+                    comment_text: []
                 }
                 this.$axios.post('http://127.0.0.1:8000/api/makepost', {
                     lang: this.form_lang,
@@ -373,7 +343,7 @@
                     this.close_form();
                     this.$axios.get('http://127.0.0.1:8000/api/posts/'+this.owner_id).then(response => {
                         this.posts = null;
-                        this.posts = response.data;
+                        this.posts = response.data.data;
                     })
                 }).catch(err => {
                         console.log(err.response.data)
